@@ -76,7 +76,7 @@ resource "aws_subnet" "public_b" {
   cidr_block              = "10.1.2.0/24"
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.main.id
-  availability_zone       = "${data.aws_region.current.name}b"
+  availability_zone       = "${data.aws_region.current.name}c"
 
   tags = merge(
     local.common_tags,
@@ -160,7 +160,7 @@ resource "aws_route" "private_a_internet_out" {
 resource "aws_subnet" "private_b" {
   cidr_block        = "10.1.11.0/24"
   vpc_id            = aws_vpc.main.id
-  availability_zone = "${data.aws_region.current.name}b"
+  availability_zone = "${data.aws_region.current.name}c"
 
   tags = merge(
     local.common_tags,

@@ -18,6 +18,7 @@ resource "aws_internet_gateway" "main" {
   )
 }
 
+#########################################################################
 # Public Subnets a
 resource "aws_subnet" "public_a" {
   cidr_block              = "10.1.1.0/24"
@@ -120,4 +121,69 @@ resource "aws_nat_gateway" "public_b" {
     local.common_tags,
     map("Name", "${local.prefix}-ngw-public-b")
   )
+}
+
+#########################################################################
+# Private Subnet a
+resource "aws_subnet" "private_a" {
+  cidr_block        = "10.1.10.0/24"
+  vpc_id            = aws_vpc.main.id
+  availability_zone = "${data.aws_region.current.name}a"
+
+  tags = merge(
+    local.common_tags,
+    map("Name", "${local.prefix}-subnet-private-a")
+  )
+}
+
+resource "aws_route_table" "private_a" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    local.common_tags,
+    map("Name", "${local.prefix}-rt-private-a")
+  )
+}
+
+resource "aws_route_table_association" "private_a" {
+  route_table_id = aws_route_table.private_a.id
+  subnet_id      = aws_subnet.private_a.id
+}
+
+resource "aws_route" "private_a_internet_out" {
+  route_table_id         = aws_route_table.private_a.id
+  nat_gateway_id         = aws_nat_gateway.public_a.id
+  destination_cidr_block = "0.0.0.0/0"
+}
+
+# Private Subnet b
+resource "aws_subnet" "private_b" {
+  cidr_block        = "10.1.11.0/24"
+  vpc_id            = aws_vpc.main.id
+  availability_zone = "${data.aws_region.current.name}b"
+
+  tags = merge(
+    local.common_tags,
+    map("Name", "${local.prefix}-subnet-private-b")
+  )
+}
+
+resource "aws_route_table" "private_b" {
+  vpc_id = aws_vpc.main.id
+
+  tags = merge(
+    local.common_tags,
+    map("Name", "${local.prefix}-rt-private-b")
+  )
+}
+
+resource "aws_route_table_association" "private_b" {
+  route_table_id = aws_route_table.private_b.id
+  subnet_id      = aws_subnet.private_b.id
+}
+
+resource "aws_route" "private_b_internet_out" {
+  route_table_id         = aws_route_table.private_b.id
+  nat_gateway_id         = aws_nat_gateway.public_b.id
+  destination_cidr_block = "0.0.0.0/0"
 }
